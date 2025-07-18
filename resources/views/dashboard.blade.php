@@ -47,7 +47,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Total Invoices</p>
-                        <p class="text-2xl font-bold text-gray-900">24</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ $stats['total'] }}</p>
                     </div>
                 </div>
             </div>
@@ -61,7 +61,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Total Revenue</p>
-                        <p class="text-2xl font-bold text-gray-900">$2,450</p>
+                        <p class="text-2xl font-bold text-gray-900">£{{ number_format($stats['total_revenue'], 2) }}</p>
                     </div>
                 </div>
             </div>
@@ -75,7 +75,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">This Month</p>
-                        <p class="text-2xl font-bold text-gray-900">8</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ $stats['this_month'] }}</p>
                     </div>
                 </div>
             </div>
@@ -89,7 +89,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Avg. Amount</p>
-                        <p class="text-2xl font-bold text-gray-900">$102</p>
+                        <p class="text-2xl font-bold text-gray-900">£{{ number_format($stats['avg_amount'], 2) }}</p>
                     </div>
                 </div>
             </div>
@@ -135,107 +135,60 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- Sample Invoice Row 1 -->
+                        @forelse($invoices as $invoice)
                         <tr class="hover:bg-gray-50 transition-colors duration-200">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">INV-001</div>
+                                <div class="text-sm font-medium text-gray-900">{{ $invoice->invoice_number }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">John Smith</div>
-                                <div class="text-sm text-gray-500">+1 (555) 123-4567</div>
+                                <div class="text-sm text-gray-900">{{ $invoice->customer_name }}</div>
+                                <div class="text-sm text-gray-500">{{ $invoice->customer_phone }}</div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">Airport → Downtown Hotel</div>
-                                <div class="text-sm text-gray-500">Sedan • 15 miles</div>
+                                <div class="text-sm text-gray-900">{{ $invoice->pickup_location }} → {{ $invoice->dropoff_location }}</div>
+                                <div class="text-sm text-gray-500">{{ ucfirst($invoice->vehicle_type) }} • {{ $invoice->formatted_date }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Dec 15, 2024</div>
-                                <div class="text-sm text-gray-500">2:30 PM</div>
+                                <div class="text-sm text-gray-900">{{ $invoice->formatted_date }}</div>
+                                <div class="text-sm text-gray-500">{{ $invoice->formatted_time }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-semibold text-gray-900">$125.00</div>
+                                <div class="text-sm font-semibold text-gray-900">{{ $invoice->formatted_total }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                    Paid
-                                </span>
+                                @if($invoice->status === 'paid')
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                        Paid
+                                    </span>
+                                @elseif($invoice->status === 'pending')
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        Pending
+                                    </span>
+                                @else
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                        Cancelled
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">
-                                    <button class="text-blue-600 hover:text-blue-900">View</button>
-                                    <button class="text-green-600 hover:text-green-900">Download</button>
-                                    <button class="text-red-600 hover:text-red-900">Delete</button>
+                                    <a href="{{ route('invoices.preview', $invoice) }}" class="text-blue-600 hover:text-blue-900">View</a>
+                                    <a href="{{ route('invoices.download', $invoice) }}" class="text-green-600 hover:text-green-900">Download</a>
+                                    <form action="{{ route('invoices.destroy', $invoice) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to delete this invoice?')">Delete</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
-
-                        <!-- Sample Invoice Row 2 -->
-                        <tr class="hover:bg-gray-50 transition-colors duration-200">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">INV-002</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Sarah Johnson</div>
-                                <div class="text-sm text-gray-500">+1 (555) 987-6543</div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">Downtown → Airport</div>
-                                <div class="text-sm text-gray-500">SUV • 18 miles</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Dec 14, 2024</div>
-                                <div class="text-sm text-gray-500">9:15 AM</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-semibold text-gray-900">$145.00</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    Pending
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex space-x-2">
-                                    <button class="text-blue-600 hover:text-blue-900">View</button>
-                                    <button class="text-green-600 hover:text-green-900">Download</button>
-                                    <button class="text-red-600 hover:text-red-900">Delete</button>
-                                </div>
+                        @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                                No invoices found. <a href="{{ route('home') }}" class="text-blue-600 hover:text-blue-900">Create your first invoice</a>
                             </td>
                         </tr>
-
-                        <!-- Sample Invoice Row 3 -->
-                        <tr class="hover:bg-gray-50 transition-colors duration-200">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">INV-003</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Mike Wilson</div>
-                                <div class="text-sm text-gray-500">+1 (555) 456-7890</div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900">Airport → Business District</div>
-                                <div class="text-sm text-gray-500">Luxury • 12 miles</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Dec 13, 2024</div>
-                                <div class="text-sm text-gray-500">11:45 AM</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-semibold text-gray-900">$180.00</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                    Paid
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex space-x-2">
-                                    <button class="text-blue-600 hover:text-blue-900">View</button>
-                                    <button class="text-green-600 hover:text-green-900">Download</button>
-                                    <button class="text-red-600 hover:text-red-900">Delete</button>
-                                </div>
-                            </td>
-                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
