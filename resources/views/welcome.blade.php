@@ -39,7 +39,8 @@
         <!-- Invoice Form -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="px-6 py-8">
-                <form id="invoiceForm" class="space-y-6">
+                <form action="{{ route('invoices.store') }}" method="POST" class="space-y-6">
+                    @csrf
                     <!-- Trip Details Section -->
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Trip Details</h3>
@@ -81,8 +82,16 @@
                                 </label>
                                 <input type="tel" id="customer_phone" name="customer_phone" required
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 focus:outline-none"
-                                    placeholder="+1 (555) 123-4567">
+                                    placeholder="+44 7947 150607">
                             </div>
+                        </div>
+                        <div class="mt-6">
+                            <label for="customer_email" class="block text-sm font-medium text-gray-700 mb-2">
+                                Email (Optional)
+                            </label>
+                            <input type="email" id="customer_email" name="customer_email"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent focus:outline-none transition-all duration-200"
+                                placeholder="customer@email.com">
                         </div>
                     </div>
 
@@ -126,7 +135,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
                                 <label for="base_fare" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Base Fare ($)
+                                    Base Fare (£)
                                 </label>
                                 <input type="number" id="base_fare" name="base_fare" step="0.01" required
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent focus:outline-none transition-all duration-200"
@@ -134,7 +143,7 @@
                             </div>
                             <div>
                                 <label for="distance_fare" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Distance Fare ($)
+                                    Distance Fare (£)
                                 </label>
                                 <input type="number" id="distance_fare" name="distance_fare" step="0.01" required
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent focus:outline-none transition-all duration-200"
@@ -142,11 +151,40 @@
                             </div>
                             <div>
                                 <label for="total_amount" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Total Amount ($)
+                                    Total Amount (£)
                                 </label>
                                 <input type="number" id="total_amount" name="total_amount" step="0.01" required
                                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent focus:outline-none transition-all duration-200 bg-gray-50"
                                     placeholder="0.00" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Status -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Payment Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Payment Method
+                                </label>
+                                <select id="payment_method" name="payment_method" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent focus:outline-none transition-all duration-200">
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Card</option>
+                                    <option value="bank_transfer">Bank Transfer</option>
+                                    <option value="paypal">PayPal</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Payment Status
+                                </label>
+                                <select id="status" name="status" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent focus:outline-none transition-all duration-200">
+                                    <option value="pending">Pending</option>
+                                    <option value="paid">Paid</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -188,13 +226,6 @@
             const total = baseFare + distanceFare;
             document.getElementById('total_amount').value = total.toFixed(2);
         }
-
-        // Form submission
-        document.getElementById('invoiceForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Here you would handle the form submission
-            alert('Invoice generation feature will be implemented in the backend');
-        });
     </script>
 </body>
 </html>

@@ -3,39 +3,93 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Invoice Preview - United Airport Pickup</title>
+    <title>Invoice {{ $invoice->invoice_number }} - United Airport Pickup</title>
     
     <!-- Fonts -->
     <link href="https://fonts.bunny.net/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Vite Assets -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+        .bg-gray-50 { background-color: #f9fafb; }
+        .bg-white { background-color: #ffffff; }
+        .bg-gray-300 { background-color: #d1d5db; }
+        .bg-gray-100 { background-color: #f3f4f6; }
+        .text-gray-900 { color: #111827; }
+        .text-gray-600 { color: #4b5563; }
+        .text-gray-700 { color: #374151; }
+        .text-green-600 { color: #059669; }
+        .text-yellow-600 { color: #d97706; }
+        .text-red-600 { color: #dc2626; }
+        .border-gray-200 { border-color: #e5e7eb; }
+        .border-gray-100 { border-color: #f3f4f6; }
+        .rounded-2xl { border-radius: 1rem; }
+        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .overflow-hidden { overflow: hidden; }
+        .px-8 { padding-left: 2rem; padding-right: 2rem; }
+        .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mr-4 { margin-right: 1rem; }
+        .w-full { width: 100%; }
+        .w-64 { width: 16rem; }
+        .w-32 { width: 8rem; }
+        .h-28 { height: 7rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .font-bold { font-weight: 700; }
+        .font-semibold { font-weight: 600; }
+        .font-medium { font-weight: 500; }
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .gap-8 { gap: 2rem; }
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .justify-between { justify-content: space-between; }
+        .justify-end { justify-content: flex-end; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+        .border-b { border-bottom-width: 1px; }
+        .border-t { border-top-width: 1px; }
+        .border { border-width: 1px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem 0; }
+        .object-contain { object-fit: contain; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .bg-gray-200 { background-color: #e5e7eb; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .text-gray-600 { color: #4b5563; }
+        .font-bold { font-weight: 700; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        
+        @media print {
+            body { margin: 0; }
+            .page-break { page-break-before: always; }
+        }
+        
+        /* Responsive grid for PDF */
+        @media (max-width: 768px) {
+            .grid-cols-2 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- Header -->
-    <header class="bg-gray-300 shadow-sm border-b border-gray-400">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <div class="flex items-center">
-                    <img src="{{ asset('images/uap-logo.png') }}" alt="United Airport Pickup Logo" class="w-40 h-40 object-contain">
-                    <h1 class="ml-3 text-xl font-semibold text-gray-900">United Airport Pickup</h1>
-                </div>
-                <nav class="flex items-center space-x-8">
-                    <a href="/" class="text-gray-500 hover:text-gray-900 whitespace-nowrap">Invoice Generator</a>
-                    <a href="/dashboard" class="text-gray-500 hover:text-gray-900 whitespace-nowrap">Dashboard</a>
-                </nav>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <!-- Page Title -->
-        <div class="mb-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-2">Invoice Preview</h2>
-            <p class="text-gray-600">Preview your invoice before generating</p>
-        </div>
-
+    <div style="max-width: 64rem; margin: 0 auto; padding: 2rem 1rem;">
         <!-- Invoice Preview -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <!-- Invoice Header -->
@@ -43,7 +97,7 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <div class="flex items-center mb-4">
-                            <img src="{{ asset('images/uap-logo.png') }}" alt="United Airport Pickup Logo" class="w-32 h-28 object-contain mr-4">
+                            <img src="{{ public_path('images/uap-logo.png') }}" alt="United Airport Pickup Logo" class="w-32 h-28 object-contain mr-4">
                             <div>
                                 <h1 class="text-2xl font-bold text-gray-900">United Airport Pickup</h1>
                                 <p class="text-gray-600">Professional Airport Transportation</p>
@@ -186,48 +240,12 @@
                         <h3 class="text-lg font-semibold text-gray-900 mb-3">Notes:</h3>
                         <div class="text-sm text-gray-600">
                             <p>Thank you for choosing United Airport Pickup!</p>
-                            <p>For any questions, please contact us at (555) 123-4567</p>
+                            <p>For any questions, please contact us at +44 7947 150607</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Action Buttons -->
-        <div class="mt-8 flex flex-col sm:flex-row gap-4">
-            <a href="{{ route('invoices.download', $invoice) }}" class="flex-1 bg-black text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-800 transition-all duration-200 text-center">
-                Download PDF
-            </a>
-            <a href="{{ route('invoices.share', $invoice) }}" class="flex-1 bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-all duration-200 text-center">
-                Share via WhatsApp
-            </a>
-            <a href="{{ route('home') }}" class="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-200 text-center">
-                Back to Generator
-            </a>
-        </div>
-    </main>
-
-    <script>
-        // Add interactivity for the invoice preview
-        document.addEventListener('DOMContentLoaded', function() {
-            // Download PDF functionality
-            const downloadBtn = document.querySelector('button:contains("Download PDF")');
-            if (downloadBtn) {
-                downloadBtn.addEventListener('click', function() {
-                    // PDF generation logic would be implemented here
-                    alert('PDF download feature will be implemented in the backend');
-                });
-            }
-
-            // WhatsApp sharing functionality
-            const whatsappBtn = document.querySelector('button:contains("Share via WhatsApp")');
-            if (whatsappBtn) {
-                whatsappBtn.addEventListener('click', function() {
-                    // WhatsApp sharing logic would be implemented here
-                    alert('WhatsApp sharing feature will be implemented in the backend');
-                });
-            }
-        });
-    </script>
+    </div>
 </body>
 </html> 
