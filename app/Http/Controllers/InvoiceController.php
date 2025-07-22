@@ -138,4 +138,12 @@ class InvoiceController extends Controller
         
         return redirect($whatsappUrl);
     }
+
+    public function share(Invoice $invoice)
+    {
+        $pdfUrl = route('invoices.download', $invoice);
+        $message = urlencode("Here is your invoice from United Airport Pickup: $pdfUrl");
+        $whatsappUrl = "https://wa.me/?text=$message";
+        return redirect($whatsappUrl);
+    }
 }
