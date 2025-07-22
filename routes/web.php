@@ -13,4 +13,4 @@ Route::get('/invoices/{invoice}/preview', [InvoiceController::class, 'preview'])
 Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.update-status');
 Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
 Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'downloadPdf'])->name('invoices.download');
-Route::get('/invoices/{invoice}/share', [InvoiceController::class, 'shareWhatsApp'])->name('invoices.share');
+Route::get('/invoices/{invoice}/share', [\App\Http\Controllers\InvoiceController::class, 'share'])->name('invoices.share');

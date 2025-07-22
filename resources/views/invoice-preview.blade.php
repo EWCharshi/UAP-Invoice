@@ -37,13 +37,13 @@
         </div>
 
         <!-- Invoice Preview -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-white overflow-hidden">
             <!-- Invoice Header -->
-            <div class="px-8 py-6 border-b border-gray-200 bg-gray-300">
+            <div class="px-8 py-6 border-b border-gray-200">
                 <div class="flex justify-between items-start">
                     <div>
                         <div class="flex items-center mb-4">
-                            <img src="{{ asset('images/uap-logo.png') }}" alt="United Airport Pickup Logo" class="w-32 h-28 object-contain mr-4">
+                            <img src="{{ asset('images/uap-logo.png') }}" alt="United Airport Pickup Logo" style="height:70px; width:auto; object-fit:contain; margin-right:1rem;">
                             <div>
                                 <h1 class="text-2xl font-bold text-gray-900">United Airport Pickup</h1>
                                 <p class="text-gray-600">Professional Airport Transportation</p>
