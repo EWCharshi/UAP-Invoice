@@ -41,6 +41,35 @@
             <div class="px-6 py-8">
                 <form action="{{ route('invoices.store') }}" method="POST" class="space-y-6">
                     @csrf
+                    
+                    <!-- Excel Import Section -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Import Data from Excel</h3>
+                        <div class="bg-gray-50 rounded-xl p-6 border-2 border-dashed border-gray-300">
+                            <div class="text-center">
+                                <div class="mb-4">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="excel_file" class="cursor-pointer bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors duration-200">
+                                        Choose Excel File
+                                    </label>
+                                    <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls,.csv" class="hidden">
+                                </div>
+                                <p class="text-sm text-gray-600 mb-4">
+                                    Upload an Excel file with customer and location data. Supported formats: .xlsx, .xls, .csv
+                                </p>
+                                <div id="file-info" class="hidden text-sm text-gray-600 mb-4"></div>
+                                <button type="button" id="import-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 hidden">
+                                    Import Data
+                                </button>
+                                <div id="import-status" class="mt-4"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Trip Details Section -->
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Trip Details</h3>
@@ -49,9 +78,14 @@
                                 <label for="pickup_location" class="block text-sm font-medium text-gray-700 mb-2">
                                     Pickup Location
                                 </label>
-                                <input type="text" id="pickup_location" name="pickup_location" required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 focus:outline-none"
-                                    placeholder="e.g., Airport Terminal 1">
+                                <div class="relative">
+                                    <input type="text" id="pickup_location" name="pickup_location" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 focus:outline-none"
+                                        placeholder="e.g., Airport Terminal 1" list="pickup_locations_list" autocomplete="off">
+                                    <datalist id="pickup_locations_list">
+                                        <!-- Options will be populated by JavaScript -->
+                                    </datalist>
+                                </div>
                             </div>
                             <div>
                                 <label for="dropoff_location" class="block text-sm font-medium text-gray-700 mb-2">
@@ -72,9 +106,14 @@
                                 <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-2">
                                     Customer Name
                                 </label>
-                                <input type="text" id="customer_name" name="customer_name" required
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 focus:outline-none"
-                                    placeholder="Full name">
+                                <div class="relative">
+                                    <input type="text" id="customer_name" name="customer_name" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 focus:outline-none"
+                                        placeholder="Full name" list="customer_names_list" autocomplete="off">
+                                    <datalist id="customer_names_list">
+                                        <!-- Options will be populated by JavaScript -->
+                                    </datalist>
+                                </div>
                             </div>
                             <div>
                                 <label for="customer_phone" class="block text-sm font-medium text-gray-700 mb-2">
@@ -216,6 +255,10 @@
     </main>
 
     <script>
+        // Global variables
+        let locations = [];
+        let customers = [];
+
         // Auto-calculate total amount
         document.getElementById('base_fare').addEventListener('input', calculateTotal);
         document.getElementById('distance_fare').addEventListener('input', calculateTotal);
@@ -226,6 +269,122 @@
             const total = baseFare + distanceFare;
             document.getElementById('total_amount').value = total.toFixed(2);
         }
+
+        // Excel file handling
+        document.getElementById('excel_file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('file-info').textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                document.getElementById('file-info').classList.remove('hidden');
+                document.getElementById('import-btn').classList.remove('hidden');
+            }
+        });
+
+        // Import button click handler
+        document.getElementById('import-btn').addEventListener('click', function() {
+            const fileInput = document.getElementById('excel_file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showImportStatus('Please select a file first.', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('excel_file', file);
+            formData.append('_token', document.querySelector('input[name="_token"]').value);
+
+            // Show loading state
+            showImportStatus('Importing data...', 'loading');
+            document.getElementById('import-btn').disabled = true;
+
+            fetch('{{ route("excel.import") }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showImportStatus(data.message, 'success');
+                    
+                    // Store the imported data
+                    locations = data.locations || [];
+                    customers = data.customers || [];
+                    
+                    // Populate dropdowns
+                    populateLocationDropdown();
+                    populateCustomerDropdown();
+                    
+                    // Clear file input
+                    fileInput.value = '';
+                    document.getElementById('file-info').classList.add('hidden');
+                    document.getElementById('import-btn').classList.add('hidden');
+                } else {
+                    showImportStatus(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showImportStatus('Error importing file: ' + error.message, 'error');
+            })
+            .finally(() => {
+                document.getElementById('import-btn').disabled = false;
+            });
+        });
+
+
+
+        // Populate location dropdown
+        function populateLocationDropdown() {
+            const datalist = document.getElementById('pickup_locations_list');
+            datalist.innerHTML = '';
+            
+            locations.forEach(location => {
+                const option = document.createElement('option');
+                option.value = location.name;
+                option.textContent = location.name + (location.city ? ` (${location.city})` : '');
+                datalist.appendChild(option);
+            });
+        }
+
+        // Populate customer dropdown
+        function populateCustomerDropdown() {
+            const datalist = document.getElementById('customer_names_list');
+            datalist.innerHTML = '';
+            
+            customers.forEach(customer => {
+                const option = document.createElement('option');
+                option.value = customer.name;
+                option.textContent = customer.name + (customer.company ? ` - ${customer.company}` : '');
+                datalist.appendChild(option);
+            });
+        }
+
+        // Show import status
+        function showImportStatus(message, type) {
+            const statusDiv = document.getElementById('import-status');
+            const colors = {
+                success: 'text-green-600',
+                error: 'text-red-600',
+                loading: 'text-blue-600'
+            };
+            
+            statusDiv.innerHTML = `<p class="${colors[type]} font-medium">${message}</p>`;
+            statusDiv.classList.remove('hidden');
+        }
+
+        // Auto-fill customer details when customer name is selected
+        document.getElementById('customer_name').addEventListener('input', function(e) {
+            const selectedCustomer = customers.find(customer => customer.name === e.target.value);
+            if (selectedCustomer) {
+                document.getElementById('customer_phone').value = selectedCustomer.phone || '';
+                document.getElementById('customer_email').value = selectedCustomer.email || '';
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Page is ready, Excel import functionality is available
+        });
     </script>
 </body>
 </html>

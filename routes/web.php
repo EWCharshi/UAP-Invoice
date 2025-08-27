@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\ExcelImportController;
 
 Route::get('/', [InvoiceController::class, 'create'])->name('home');
 Route::get('/dashboard', [InvoiceController::class, 'index'])->name('dashboard');
@@ -14,3 +15,6 @@ Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateSta
 Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
 Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'downloadPdf'])->name('invoices.download');
 Route::get('/invoices/{invoice}/share', [\App\Http\Controllers\InvoiceController::class, 'share'])->name('invoices.share');
+
+// Excel Import routes
+Route::post('/excel/import', [ExcelImportController::class, 'import'])->name('excel.import');
