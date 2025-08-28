@@ -36,6 +36,38 @@
             <p class="text-gray-600">Create professional invoices for completed trips</p>
         </div>
 
+        <!-- Error Messages -->
+        @if(session('error'))
+            <div class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-800">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Success Messages -->
+        @if(session('success'))
+            <div class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-green-800">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Invoice Form -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="px-6 py-8">
@@ -244,10 +276,11 @@
                             class="flex-1 bg-black text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-800 transition-all duration-200 focus:ring-2 focus:ring-black focus:ring-offset-2">
                             Generate Invoice
                         </button>
-                        <a href="/invoice-preview" 
-                            class="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-center">
+                        <button type="button" id="preview-btn"
+                            class="flex-1 bg-gray-100 text-gray-500 px-6 py-3 rounded-xl font-semibold transition-all duration-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 cursor-not-allowed opacity-75"
+                            title="Generate an invoice first to preview it">
                             Preview Invoice
-                        </a>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -381,9 +414,99 @@
             }
         });
 
+        // Preview button validation and interaction
+        const previewBtn = document.getElementById('preview-btn');
+        
+        previewBtn.addEventListener('click', function() {
+            // Check if form has required fields filled
+            const customerName = document.getElementById('customer_name').value.trim();
+            const customerPhone = document.getElementById('customer_phone').value.trim();
+            const pickupLocation = document.getElementById('pickup_location').value.trim();
+            const dropoffLocation = document.getElementById('dropoff_location').value.trim();
+            const tripDate = document.getElementById('trip_date').value;
+            const tripTime = document.getElementById('trip_time').value;
+            const vehicleType = document.getElementById('vehicle_type').value;
+            const baseFare = document.getElementById('base_fare').value;
+            const distanceFare = document.getElementById('distance_fare').value;
+            const totalAmount = document.getElementById('total_amount').value;
+            const paymentMethod = document.getElementById('payment_method').value;
+            const status = document.getElementById('status').value;
+
+            // Check if all required fields are filled
+            if (!customerName || !customerPhone || !pickupLocation || !dropoffLocation || 
+                !tripDate || !tripTime || !vehicleType || !baseFare || !distanceFare || 
+                !totalAmount || !paymentMethod || !status) {
+                
+                // Show a more user-friendly alert
+                const missingFields = [];
+                if (!customerName) missingFields.push('Customer Name');
+                if (!customerPhone) missingFields.push('Phone Number');
+                if (!pickupLocation) missingFields.push('Pickup Location');
+                if (!dropoffLocation) missingFields.push('Drop-off Location');
+                if (!tripDate) missingFields.push('Trip Date');
+                if (!tripTime) missingFields.push('Trip Time');
+                if (!vehicleType) missingFields.push('Vehicle Type');
+                if (!baseFare) missingFields.push('Base Fare');
+                if (!distanceFare) missingFields.push('Distance Fare');
+                if (!totalAmount) missingFields.push('Total Amount');
+                if (!paymentMethod) missingFields.push('Payment Method');
+                if (!status) missingFields.push('Payment Status');
+
+                alert(`⚠️ Please complete the following required fields:\n\n${missingFields.join('\n')}\n\nYou can only preview an invoice after all details have been entered.`);
+                return;
+            }
+
+            // If all fields are filled, show a message that they need to generate first
+            alert('📄 To preview your invoice, please click "Generate Invoice" first.\n\nAfter generating, you will be redirected to the preview page automatically.');
+        });
+
+        // Function to check if form is complete and update preview button state
+        function updatePreviewButtonState() {
+            const customerName = document.getElementById('customer_name').value.trim();
+            const customerPhone = document.getElementById('customer_phone').value.trim();
+            const pickupLocation = document.getElementById('pickup_location').value.trim();
+            const dropoffLocation = document.getElementById('dropoff_location').value.trim();
+            const tripDate = document.getElementById('trip_date').value;
+            const tripTime = document.getElementById('trip_time').value;
+            const vehicleType = document.getElementById('vehicle_type').value;
+            const baseFare = document.getElementById('base_fare').value;
+            const distanceFare = document.getElementById('distance_fare').value;
+            const totalAmount = document.getElementById('total_amount').value;
+            const paymentMethod = document.getElementById('payment_method').value;
+            const status = document.getElementById('status').value;
+
+            const isFormComplete = customerName && customerPhone && pickupLocation && dropoffLocation && 
+                                 tripDate && tripTime && vehicleType && baseFare && distanceFare && 
+                                 totalAmount && paymentMethod && status;
+
+            if (isFormComplete) {
+                previewBtn.classList.remove('bg-gray-100', 'text-gray-500', 'cursor-not-allowed', 'opacity-75');
+                previewBtn.classList.add('bg-blue-100', 'text-blue-700', 'cursor-pointer', 'hover:bg-blue-200');
+                previewBtn.title = 'Click to preview invoice (will show instructions)';
+            } else {
+                previewBtn.classList.remove('bg-blue-100', 'text-blue-700', 'cursor-pointer', 'hover:bg-blue-200');
+                previewBtn.classList.add('bg-gray-100', 'text-gray-500', 'cursor-not-allowed', 'opacity-75');
+                previewBtn.title = 'Generate an invoice first to preview it';
+            }
+        }
+
+        // Add event listeners to all form fields to update preview button state
+        const formFields = ['customer_name', 'customer_phone', 'pickup_location', 'dropoff_location', 
+                           'trip_date', 'trip_time', 'vehicle_type', 'base_fare', 'distance_fare', 
+                           'total_amount', 'payment_method', 'status'];
+        
+        formFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.addEventListener('input', updatePreviewButtonState);
+                field.addEventListener('change', updatePreviewButtonState);
+            }
+        });
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             // Page is ready, Excel import functionality is available
+            updatePreviewButtonState(); // Set initial state of preview button
         });
     </script>
 </body>

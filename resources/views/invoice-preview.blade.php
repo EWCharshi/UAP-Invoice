@@ -33,7 +33,7 @@
         <!-- Page Title -->
         <div class="mb-8">
             <h2 class="text-3xl font-bold text-gray-900 mb-2">Invoice Preview</h2>
-            <p class="text-gray-600">Preview your invoice before generating</p>
+            <p class="text-gray-600">Preview your generated invoice</p>
         </div>
 
         <!-- Invoice Preview -->
